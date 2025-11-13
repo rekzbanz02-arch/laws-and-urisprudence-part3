@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Messenger: @Rekz Banz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background-color: #19124e;
+      color: #fefeff;
+    }
+    h1 { color: #fefeff; }
+    button {
+      padding: 15px 30px;
+      font-size: 20px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover { background-color: #0056b3; }
+    button:disabled { background-color: #ccc; cursor: default; }
+    .question { margin-bottom: 25px; }
+    .correct { color: #00ff88; font-weight: bold; }
+    .wrong { color: #ff5577; font-weight: bold; }
+    .highlight { margin-top: 10px; }
+    input[type="radio"] { transform: scale(1.5); margin-right: 10px; }
+    #finishBtn { font-size: 2em; padding: .1em 1em; }
+    .nav-buttons { margin-top: 20px; display: flex; gap: 10px; }
+
+    #codeInput {
+      font-size: 15px;
+      padding: 10px 20px;
+      width: 300px;
+      border-radius: 8px;
+      border: 2px solid #888;
+    }
+
+    #codeInput::placeholder { font-size: 15px; }
+
+    /* Smaller font for Enter Access Code */
+    #accessSection h2 {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+
+    /* Style for filename display above access code */
+    #fileDisplay {
+      font-size: 1.3em;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #9fe3ff;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="accessSection">
+    <p id="fileDisplay"></p> <!-- NEW filename display -->
+    <h2>Enter Access Code</h2>
+    <input type="password" id="codeInput" placeholder="Enter code here" />
+    <br>
+    <button type="button" id="accessSubmit" style="padding:10px 40px; font-size:20px;">Login</button>
+
+    <span id="contactLink" style="margin-left:16px; font-size:14px; text-decoration:underline; cursor:pointer; color:#9fe3ff;">
+     Contact here! 
+    </span>
+
+
+    <p id="message" aria-live="polite"></p>
+    <br>
+    <p id="tipsArea">Loading tips...</p>
+  </div>
+
+  <div id="mainContent" style="display:none;">
+    <div id="reviewerSection">
+      <h1>Reviewer: Laws & Jurisprudence-(Part3)</h1>
+ 
+ 
+ 
+      <button onclick="showQuiz()">Start Quiz</button>
+    </div>
+
+    <div id="quizSection" style="display:none;">
+      <h1>Quiz: Laws & Jurisprudence-(Part3)</h1>
+      <p style="font-size: 15px; font-weight: 600; margin: 0;">Multiple-Choice Quiz (random items)</p>
+      <form id="quizForm"></form>
+
+      <div class="nav-buttons">
+        <button id="finishBtn">Score</button>
+        <button type="button" onclick="refreshQuiz()">Restart Quiz</button>
+        <button type="button" onclick="backToReviewer()">Reviewer</button>
+      </div>
+      <div id="result" class="highlight"></div>
+    </div>
+  </div>
+
+<!-- CONTACT POPUP MODAL -->
+<div id="contactModalBG" style="
+  display:none; 
+  position:fixed; 
+  top:0; left:0; 
+  width:100%; height:100%; 
+  background:rgba(0,0,0,0.6); 
+  z-index:1000;
+">
+  <div id="contactModal" style="
+    background:#ffffff; 
+    color:#000; 
+    width:90%; 
+    max-width:450px; 
+    margin:80px auto; 
+    padding:25px; 
+    border-radius:12px; 
+    box-shadow:0 0 15px rgba(0,0,0,0.5);
+  ">
+
+    <h2 style="margin-top:0; font-size:22px; text-align:center;">
+      Fill-in with your details here. <br>I'll contact you shortly!
+    </h2>
+
+    <label>Name:</label>
+    <input id="c_name" type="text" style="width:100%; padding:8px; margin-bottom:10px;">
+
+    <label>Contact No.:</label>
+    <input id="c_contact" type="text" style="width:100%; padding:8px; margin-bottom:10px;">
+
+    <label>Social Media Account:</label>
+    <input id="c_social" type="text" style="width:100%; padding:8px; margin-bottom:10px;">
+
+    <label>Request / Comment:</label>
+    <textarea id="c_request" style="width:100%; padding:8px; margin-bottom:10px; height:80px;"></textarea>
+
+    <button id="c_submit" style="
+      width:100%; padding:10px; 
+      background:#007BFF; color:#fff; border:none; border-radius:6px;
+      margin-top:10px; font-size:18px;
+    ">Submit</button>
+
+    <button id="c_close" style="
+      width:100%; padding:10px; 
+      background:#444; color:#fff; border:none; border-radius:6px;
+      margin-top:10px; font-size:18px;
+    ">Close</button>
+<!--
+    <p style="margin-top:20px; font-size:20px; text-align:center; color:#333;">
+      or you can contact this messenger: <b>@Rekz Banz</b>
+    </p>
+-->
+
+  </div>
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // ===== Display filename on login page =====
+  const quizTitleEl = document.querySelector("#quizSection h1");
+  const displayFileName = quizTitleEl ? quizTitleEl.textContent.replace("Quiz: ", "").trim() : "index.html";
+  const fileDisplay = document.getElementById("fileDisplay");
+  if (fileDisplay) fileDisplay.textContent = displayFileName;
+
+  // ===== SETTINGS =====
+  const BIN_URL_CODE = "https://api.jsonbin.io/v3/b/6912d50eae596e708f51dade/latest";
+  const BIN_URL_TIPS = "https://api.jsonbin.io/v3/b/68f1b652ae596e708f180d5d/latest";
+  const MASTER_KEY_CODE = "$2a$10$CvK4w8DTXZ1//5H1cpGQIerIT8Kzvk0FQHosdNm.XS0Q9n6sMmaf6";
+  const MASTER_KEY_TIPS = "$2a$10$CvK4w8DTXZ1//5H1cpGQIerIT8Kzvk0FQHosdNm.XS0Q9n6sMmaf6";
+
+  // === LOGGER BIN (Access Log) ===
+  const BIN_URL_LOG = "https://api.jsonbin.io/v3/b/6911a123d0ea881f40df102a";
+  const MASTER_KEY_LOG = MASTER_KEY_CODE;
+
+  // === SCORE LOG BIN (New) ===
+  const BIN_URL_SCORE = "https://api.jsonbin.io/v3/b/6912985cd0ea881f40e0cf7c";
+  const MASTER_KEY_SCORE = MASTER_KEY_CODE;
+
+  // ===== ELEMENTS =====
+  const accessSection = document.getElementById("accessSection");
+  const mainContent = document.getElementById("mainContent");
+  const codeInput = document.getElementById("codeInput");
+  const accessSubmit = document.getElementById("accessSubmit");
+  const message = document.getElementById("message");
+  const tipsArea = document.getElementById("tipsArea");
+
+// ===============================
+// CONTACT MODAL LOGIC (WORKING)
+// ===============================
+
+// open modal
+const contactLink = document.getElementById("contactLink");
+const contactBG = document.getElementById("contactModalBG");
+const contactClose = document.getElementById("c_close");
+const contactSubmit = document.getElementById("c_submit");
+
+if (contactLink && contactBG) {
+  contactLink.addEventListener("click", () => {
+    contactBG.style.display = "block";
+  });
+}
+
+if (contactClose && contactBG) {
+  contactClose.addEventListener("click", () => {
+    contactBG.style.display = "none";
+  });
+}
+// ===============================
+// CONTACT SUBMISSION SAVE LOGIC
+// ===============================
+const BIN_CONTACT_LOG = "https://api.jsonbin.io/v3/b/69146372d0ea881f40e3989e";
+const MASTER_KEY_CONTACT = MASTER_KEY_CODE;
+
+if (contactSubmit) {
+  contactSubmit.addEventListener("click", async () => {
+    const name = document.getElementById("c_name").value.trim();
+    const contact = document.getElementById("c_contact").value.trim();
+    const social = document.getElementById("c_social").value.trim();
+    const request = document.getElementById("c_request").value.trim();
+
+    if (!name || !contact || !request) {
+      alert("Please fill out name, contact, and request/comment.");
+      return;
+    }
+
+    const quizTitleElLocal = document.querySelector("#quizSection h1");
+    const fileName = quizTitleElLocal
+      ? quizTitleElLocal.textContent.replace("Quiz: ", "").trim()
+      : "index.html";
+
+    const deviceInfo = await getDeviceInfo();
+
+    try {
+      const getRes = await fetch(`${BIN_CONTACT_LOG}/latest`, {
+        headers: { "X-Master-Key": MASTER_KEY_CONTACT }
+      });
+      const data = await getRes.json();
+      const logs = Array.isArray(data.record) ? data.record : [];
+
+      logs.push({
+        event: "Client Request",
+        request,
+        name,
+        contact,
+        social,
+        filename: fileName,
+        timestamp: new Date().toLocaleString(),
+        device: deviceInfo
+      });
+
+      await fetch(BIN_CONTACT_LOG, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Master-Key": MASTER_KEY_CONTACT
+        },
+        body: JSON.stringify(logs)
+      });
+
+      alert("Message sent!");
+      contactBG.style.display = "none";
+
+    } catch (err) {
+      alert("Error sending contact message.");
+      console.error(err);
+    }
+  });
+}
+
+
+
+  // ===== HELPERS =====
+  function findStringKey(obj, keyName) {
+    if (!obj || typeof obj !== "object") return undefined;
+    for (const k in obj) {
+      if (k.toLowerCase() === keyName.toLowerCase() && typeof obj[k] === "string") {
+        return obj[k];
+      }
+      const v = obj[k];
+      if (typeof v === "object") {
+        const nested = findStringKey(v, keyName);
+        if (nested) return nested;
+      }
+    }
+  }
+
+  async function getDeviceInfo() {
+    const uaData = navigator.userAgentData || {};
+    const ua = navigator.userAgent;
+    const platform = navigator.platform;
+    const language = navigator.language;
+    const screenResolution = `${window.screen.width}x${window.screen.height}`;
+    const browserVersion = uaData.brands
+      ? uaData.brands.map(b => `${b.brand} ${b.version}`).join(", ")
+      : ua;
+
+    // Determine general device type
+    const uaLower = ua.toLowerCase();
+    let deviceType = "desktop";
+    if (/mobi|iphone|android/i.test(uaLower)) {
+      deviceType = "mobile";
+    } else if (/tablet|ipad|nexus 7|nexus 10/i.test(uaLower)) {
+      deviceType = "tablet";
+    }
+
+    // Get approximate IP + region/country info (non-identifying)
+    let networkInfo = "Unavailable";
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      if (res.ok) {
+        const info = await res.json();
+        networkInfo = {
+          ip: info.ip,
+          city: info.city,
+          region: info.region,
+          country: info.country_name,
+          org: info.org
+        };
+      }
+    } catch {
+      networkInfo = "Network lookup failed";
+    }
+
+    // Optional: request geolocation with user consent
+    const location = await new Promise(resolve => {
+      if (!navigator.geolocation) return resolve("Geolocation not supported");
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          accuracy: pos.coords.accuracy
+        }),
+        () => resolve("Permission denied or unavailable"),
+        { timeout: 5000 }
+      );
+    });
+
+    return {
+      ua,
+      browserVersion,
+      platform,
+      language,
+      screenResolution,
+      deviceType,
+      networkInfo,
+      location
+    };
+  }
+
+  async function saveLoginToJsonBin(codeUsed) {
+    try {
+      // get filename from quiz title h1
+      const quizTitleElLocal = document.querySelector("#quizSection h1");
+      const fileName = quizTitleElLocal ? quizTitleElLocal.textContent.replace("Quiz: ", "").trim() : "index.html";
+
+      const getRes = await fetch(`${BIN_URL_LOG}/latest`, {
+        headers: { "X-Master-Key": MASTER_KEY_LOG }
+      });
+      const data = await getRes.json();
+      const logs = Array.isArray(data.record) ? data.record : [];
+
+      const deviceInfo = await getDeviceInfo();
+
+      logs.push({
+        event: "Login Access",
+        accessCode: codeUsed,
+        filename: fileName,
+        timestamp: new Date().toLocaleString(),
+        device: deviceInfo
+      });
+
+      await fetch(BIN_URL_LOG, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Master-Key": MASTER_KEY_LOG
+        },
+        body: JSON.stringify(logs)
+      });
+
+      console.log(`✅ Login logged successfully (file: ${fileName}).`);
+    } catch (err) {
+      console.error("❌ Error logging to JSONBin:", err);
+    }
+  }
+
+  // ===== LOAD TIPS =====
+  async function loadTips() {
+    try {
+      const resp = await fetch(BIN_URL_TIPS, {
+        headers: { "X-Master-Key": MASTER_KEY_TIPS, "Content-Type": "application/json" }
+      });
+      const data = await resp.json();
+      const tipsText =
+        findStringKey(data, "tips") ||
+        "Tips: <br>Press Enter after typing the code.<br>Stay online when entering.<br>For help, contact messenger: @Rekz Banz";
+      tipsArea.innerHTML = tipsText;
+    } catch (err) {
+      console.error("Tips fetch error:", err);
+      tipsArea.innerHTML =
+        "Could not load page. Please check your internet connection.";
+    }
+  }
+  loadTips();
+
+  // === NEW FUNCTION: Save Quiz Score to JSONBin ===
+  async function saveScoreToJsonBin(score, total) {
+    try {
+      const quizTitleElLocal = document.querySelector("#quizSection h1");
+      const fileName = quizTitleElLocal ? quizTitleElLocal.textContent.replace("Quiz: ", "").trim() : "index.html";
+
+      const getRes = await fetch(`${BIN_URL_SCORE}/latest`, {
+        headers: { "X-Master-Key": MASTER_KEY_SCORE }
+      });
+      const data = await getRes.json();
+      const logs = Array.isArray(data.record) ? data.record : [];
+      const deviceInfo = await getDeviceInfo();
+
+      logs.push({
+        event: "Quiz Score",
+        score: `${score}/${total}`,
+        filename: fileName,
+        timestamp: new Date().toLocaleString(),
+        device: deviceInfo
+      });
+
+      await fetch(BIN_URL_SCORE, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Master-Key": MASTER_KEY_SCORE
+        },
+        body: JSON.stringify(logs)
+      });
+      console.log("✅ Quiz score saved to JSONBin successfully.");
+    } catch (err) {
+      console.error("❌ Error saving quiz score:", err);
+    }
+  }
+
+  // ===== LOCAL STORAGE =====
+  const fileName = window.location.pathname.split("/").pop() || "default";
+  const storageKey = "savedAccessCode_" + fileName.replace(/\W+/g, "_");
+  const savedCode = localStorage.getItem(storageKey);
+  if (savedCode) codeInput.value = savedCode;
+  codeInput.addEventListener("input", () =>
+    localStorage.setItem(storageKey, codeInput.value)
+  );
+
+  // ===== LOGIN HANDLER =====
+  codeInput.addEventListener("keyup", (e) => {
+    if (e.key === "Enter") accessSubmit.click();
+  });
+
+  accessSubmit.addEventListener("click", async () => {
+    const input = codeInput.value.trim();
+    if (!input) {
+      message.textContent = "Please enter the access code.";
+      return;
+    }
+
+    accessSubmit.disabled = true;
+    codeInput.disabled = true;
+    message.textContent = "Checking...";
+
+    try {
+      const resp = await fetch(BIN_URL_CODE, {
+        headers: { "X-Master-Key": MASTER_KEY_CODE, "Content-Type": "application/json" }
+      });
+
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+
+      const remoteCode =
+        findStringKey(data, "accessCode") ||
+        findStringKey(data, "code") ||
+        findStringKey(data, "access");
+
+      if (!remoteCode) {
+        message.textContent = "Access code not found in storage record.";
+        throw new Error("No accessCode in JSON");
+      }
+
+      if (input === remoteCode.trim()) {
+        accessSection.style.display = "none";
+        mainContent.style.display = "block";
+        message.textContent = "";
+        saveLoginToJsonBin(input); // <<== AUTO LOG TO JSONBIN
+        setTimeout(() => {
+          const btn = document.querySelector("#mainContent button");
+          if (btn) btn.focus();
+        }, 100);
+      } else {
+        message.textContent = "Wrong code. Please refer to contact";
+        localStorage.removeItem(storageKey);
+        accessSubmit.disabled = false;
+        codeInput.disabled = false;
+      }
+    } catch (err) {
+      console.error("Access fetch error:", err);
+      message.textContent = "Error fetching code. Check console for details.";
+      accessSubmit.disabled = false;
+      codeInput.disabled = false;
+    }
+  });
+
+  // ===== QUIZ LOGIC =====
+  const pool = [
+  
+  
+    {q: "Which of the following best illustrates object evidence?", choices: ["A) A witness’s sworn affidavit", "B) CCTV recording of the incident", "C) A medical certificate describing the injuries", "D) The actual firearm used in committing the crime", "E) An entry in the police blotter"], correctIndex: 3},
+
+  {q: "Which bureau under the DENR is mandated to formulate policies, provide technical guidance, and oversee programs relating to the management of forest lands and the utilization of forest products?", choices: ["A) Department of Environment and Natural Resources (DENR)", "B) Community Environment and Natural Resources Office (CENRO)", "C) Forest Management Bureau (FMB)", "D) President", "E) Department of Agriculture"], correctIndex: 2},
+
+  {q: "Why must evidence be properly packaged during handling?", choices: ["A) To make the item appear official", "B) To prevent contamination, loss, or deterioration", "C) To speed up the trial process", "D) To lessen paperwork", "E) To improve the appearance of the package"], correctIndex: 1},
+
+  {q: "Maria is suspected of theft. Police officers go to her house and ask her to come to the station for questioning. At the station, Police Staff Sergeant Lito and Patrolman Bong plan to ask her about the missing items and her possible involvement in the incident. If you were Police Staff Sergeant Lito, which of the following should NOT be your advice to Maria?", choices: ["A) I will inform Maria to confess so that she can leave early.", "B) I will inform Maria that if she does not have a lawyer, we could provide one for her.", "C) I will inform Maria that she has a right to bring her counsel during the questioning.", "D) I will inform Maria that she is not obligated to answer our questions.", "E) All of the above."], correctIndex: 0},
+
+  {q: "Where to file a complaint in case the Barangay Protection Order is violated by the accused/respondent?", choices: ["A) Court of Appeals that has territorial jurisdiction over the barangay.", "B) Regional Trial Court that has territorial jurisdiction over the barangay.", "C) Municipal Trial Court that has territorial jurisdiction over the barangay.", "D) Supreme Court", "E) None of the above"], correctIndex: 2},
+
+  {q: "What is the prescription period for the crime of plunder?", choices: ["A) 10 years", "B) 15 years", "C) 20 years", "D) 25 years", "E) 30 years"], correctIndex: 2},
+
+  {q: "Which of the following crimes involves the unlawful killing of a direct ascendant or descendant?", choices: ["A) Parricide", "B) Murder", "C) Homicide", "D) Infanticide", "E) None of the above"], correctIndex: 0},
+
+  {q: "Which of the following crimes does not have a frustrated stage under Philippine law?", choices: ["A) Theft", "B) Murder", "C) Homicide", "D) Robbery", "E) None of the above"], correctIndex: 0},
+
+  {q: "What is the threshold level of intoxication set under RA No. 10586?", choices: ["A) BAC of 0.05% or over", "B) BAC of 0.05%", "C) BAC of 0.5%", "D) BAC of 0.5% or over", "E) None of the above"], correctIndex: 0},
+
+  {q: "Under the amended Rape law, a statutory rape is committed if the age of the victim is below ________.", choices: ["A) 12", "B) 13", "C) 15", "D) 16", "E) None of the above"], correctIndex: 3},
+
+  {q: "What details must be provided in a request for toxicology analysis?", choices: ["A) The suspected substance and estimated dosage", "B) The suspect’s signed confession", "C) The scheduled court hearing date", "D) The names of the witnesses", "E) None of the above"], correctIndex: 0},
+
+  {q: "Which of the following situation does not constitute custodial investigation?", choices: ["A) A person requested for appearance by the police officers in the station.", "B) A person interviewed by the police officers at the house where the alleged crime took place.", "C) A person detained was interviewed by the police officers about the crime reported.", "D) A person arrested was interviewed by the police officers about the crime reported", "E) None of the above"], correctIndex: 0},
+
+  {q: "Which of the following situations is considered a “dating relationship” under RA 9262?", choices: ["A) The parties live together as husband and wife without marriage.", "B) The parties are romantically involved over time.", "C) The relationship exists even without sexual intercourse.", "D) The parties are romantically involved on a continuing basis.", "E) All"], correctIndex: 4},
+
+  {q: "Who has original and exclusive jurisdiction over all prosecutions under the Plunder Law?", choices: ["A) Ombudsman", "B) Regional Trial Court", "C) Sandiganbayan", "D) Supreme Court", "E) None of the above"], correctIndex: 2},
+
+  {q: "Why is character evidence of the accused generally inadmissible?", choices: ["A) It is irrelevant in all situations", "B) It may unfairly prejudice the court against the accused", "C) It conclusively establishes guilt", "D) It applies only in civil cases", "E) It replaces object evidence"], correctIndex: 1},
+
+  {q: "Which of the following is not a required element in a chain of custody record?", choices: ["A) Signature of receiver", "B) Date of transfer", "C) Description of evidence", "D) Judge’s approval", "E) Evidence seals"], correctIndex: 3},
+
+  {q: "What is the gravamen of the offense under BP 22?", choices: ["A) The act of making or issuing a worthless check.", "B) The knowledge of the drawer in the insufficiency of funds.", "C) The refusal of the drawer to fund the account after receiving a notice of dishonor.", "D) Failure of the drawee bank to honor the check despite sufficient funds.", "E) The negligence of the payee in depositing the check on time."], correctIndex: 0},
+
+  {q: "Parental and filial privilege means:", choices: ["A) Parents can always refuse to appear in court", "B) Relatives cannot testify for each other", "C) Ascendants and descendants cannot be compelled to testify against each other", "D) A child can never testify against a parent even voluntarily", "E) Parents must always testify against their children"], correctIndex: 2},
+
+  {q: "What does the Parol Evidence Rule provide?", choices: ["A) Original documents must always be presented", "B) Written contracts are presumed to contain all terms, and oral evidence cannot vary them except in specific cases", "C) Oral agreements override written contracts", "D) Witness testimony is not allowed in contract disputes", "E) Written evidence is invalid unless signed"], correctIndex: 1},
+
+  {q: "How long must the head of office ensure a warrant of arrest is executed from receipt?", choices: ["A) 3 days", "B) 5 days", "C) 7 days", "D) 10 days", "E) 30 days"], correctIndex: 3}
+
+
+  ];
+
+  function pickRandom(arr, n) {
+    const copy = [...arr];
+    const result = [];
+    while (result.length < n && copy.length > 0) {
+      const idx = Math.floor(Math.random() * copy.length);
+      result.push(copy.splice(idx, 1)[0]);
+    }
+    return result;
+  }
+
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  function selectRandomChoices(item) {
+    const correctChoice = item.choices[item.correctIndex];
+    let others = item.choices.filter((_, idx) => idx !== item.correctIndex);
+    shuffleArray(others);
+    let selected = [correctChoice, ...others.slice(0, 4)];
+    shuffleArray(selected);
+    item.correctIndex = selected.indexOf(correctChoice);
+    item.choices = selected;
+  }
+
+  let quizItems = [];
+
+  window.showQuiz = function () {
+    document.getElementById("reviewerSection").style.display = "none";
+    document.getElementById("quizSection").style.display = "block";
+    buildQuiz();
+  };
+
+  window.backToReviewer = function () {
+    document.getElementById("quizSection").style.display = "none";
+    document.getElementById("reviewerSection").style.display = "block";
+    document.getElementById("quizForm").innerHTML = "";
+    document.getElementById("result").innerHTML = "";
+  };
+
+  window.refreshQuiz = function () {
+    document.getElementById("quizForm").innerHTML = "";
+    document.getElementById("result").innerHTML = "";
+    document.getElementById("finishBtn").disabled = false;
+    buildQuiz();
+  };
+
+  function buildQuiz() {
+    quizItems = pickRandom(pool, Math.min(20, pool.length));
+    const form = document.getElementById("quizForm");
+    form.innerHTML = "";
+    quizItems.forEach((item, i) => {
+      selectRandomChoices(item);
+      const div = document.createElement("div");
+      div.className = "question";
+      const q = document.createElement("p");
+      q.textContent = `${i + 1}. ${item.q}`;
+      div.appendChild(q);
+      item.choices.forEach((choice, idx) => {
+        const label = document.createElement("label");
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = `q${i}`;
+        radio.value = idx;
+        label.appendChild(radio);
+        label.appendChild(document.createTextNode(" " + choice));
+        div.appendChild(label);
+        div.appendChild(document.createElement("br"));
+      });
+      form.appendChild(div);
+    });
+  }
+
+  document.getElementById("finishBtn").addEventListener("click", async function () {
+    let score = 0;
+    const total = quizItems.length;
+    for (let i = 0; i < total; i++) {
+      const radios = document.querySelectorAll(`input[name="q${i}"]`);
+      let selected = -1;
+      radios.forEach(r => { if (r.checked) selected = parseInt(r.value); });
+      const div = document.getElementById("quizForm").children[i];
+      if (selected === quizItems[i].correctIndex) {
+        score++;
+        div.insertAdjacentHTML("beforeend", "<div class='correct'>✔ Correct</div>");
+      } else {
+        const correctAnswer = quizItems[i].choices[quizItems[i].correctIndex];
+        div.insertAdjacentHTML("beforeend", `<div class='wrong'>✘ Wrong. Correct: ${correctAnswer}</div>`);
+      }
+      radios.forEach(r => r.disabled = true);
+    }
+    document.getElementById("result").innerHTML = `<h2>Your Score: ${score} / ${total}</h2>`;
+    this.disabled = true;
+
+    // 🧠 Save score to JSONBin
+    await saveScoreToJsonBin(score, total);
+  });
+});
+</script>
+</body>
+</html>
+
+
