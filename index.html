@@ -62,7 +62,24 @@
   <div id="accessSection">
     <p id="fileDisplay"></p> <!-- NEW filename display -->
     <h2>Enter Access Code</h2>
-    <input type="password" id="codeInput" placeholder="Enter code here" />
+    <div style="position:relative; display:inline-block;">
+      <input type="password" id="codeInput" placeholder="Enter code here"
+        style="padding-right:45px;">
+    
+      <span id="toggleEye"
+        style="
+          position:absolute;
+          right:12px;
+          top:50%;
+          transform:translateY(-50%);
+          cursor:pointer;
+          font-size:20px;
+          color:#9fe3ff;
+          user-select:none;
+        "
+      >👁️</span>
+    </div>
+    
     <br>
     <button type="button" id="accessSubmit" style="padding:10px 40px; font-size:20px;">Login</button>
 
@@ -158,6 +175,20 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+    // ===== SHOW / HIDE PASSWORD TOGGLE =====
+    const toggleEye = document.getElementById("toggleEye");
+  const codeInputEye = document.getElementById("codeInput");
+
+  toggleEye.addEventListener("click", () => {
+    if (codeInputEye.type === "password") {
+      codeInputEye.type = "text";
+      toggleEye.textContent = "🙈"; // hide icon
+    } else {
+      codeInputEye.type = "password";
+      toggleEye.textContent = "👁️"; // show icon
+    }
+  });
+
   // ===== Display filename on login page =====
   const quizTitleEl = document.querySelector("#quizSection h1");
   const displayFileName = quizTitleEl ? quizTitleEl.textContent.replace("Quiz: ", "").trim() : "index.html";
@@ -493,7 +524,7 @@ if (contactSubmit) {
           if (btn) btn.focus();
         }, 100);
       } else {
-        message.textContent = "Wrong code. Please go to tips.";
+        message.textContent = "Wrong code. Please refer to contact";
         localStorage.removeItem(storageKey);
         accessSubmit.disabled = false;
         codeInput.disabled = false;
@@ -510,45 +541,45 @@ if (contactSubmit) {
   const pool = [
   
   
-    {q: "Which of the following best illustrates object evidence?", choices: ["A) A witness’s sworn affidavit", "B) CCTV recording of the incident", "C) A medical certificate describing the injuries", "D) The actual firearm used in committing the crime", "E) An entry in the police blotter"], correctIndex: 3},
+  {q: "Which of the following best illustrates object evidence?", choices: ["A) A witness’s sworn affidavit", "B) CCTV recording of the incident", "C) A medical certificate describing the injuries", "D) The actual firearm used in committing the crime", "E) An entry in the police blotter"], correctIndex: 3},
 
-  {q: "Which bureau under the DENR is mandated to formulate policies, provide technical guidance, and oversee programs relating to the management of forest lands and the utilization of forest products?", choices: ["A) Department of Environment and Natural Resources (DENR)", "B) Community Environment and Natural Resources Office (CENRO)", "C) Forest Management Bureau (FMB)", "D) President", "E) Department of Agriculture"], correctIndex: 2},
+{q: "Which bureau under the DENR is mandated to formulate policies, provide technical guidance, and oversee programs relating to the management of forest lands and the utilization of forest products?", choices: ["A) Department of Environment and Natural Resources (DENR)", "B) Community Environment and Natural Resources Office (CENRO)", "C) Forest Management Bureau (FMB)", "D) President", "E) Department of Agriculture"], correctIndex: 2},
 
-  {q: "Why must evidence be properly packaged during handling?", choices: ["A) To make the item appear official", "B) To prevent contamination, loss, or deterioration", "C) To speed up the trial process", "D) To lessen paperwork", "E) To improve the appearance of the package"], correctIndex: 1},
+{q: "Why must evidence be properly packaged during handling?", choices: ["A) To make the item appear official", "B) To prevent contamination, loss, or deterioration", "C) To speed up the trial process", "D) To lessen paperwork", "E) To improve the appearance of the package"], correctIndex: 1},
 
-  {q: "Maria is suspected of theft. Police officers go to her house and ask her to come to the station for questioning. At the station, Police Staff Sergeant Lito and Patrolman Bong plan to ask her about the missing items and her possible involvement in the incident. If you were Police Staff Sergeant Lito, which of the following should NOT be your advice to Maria?", choices: ["A) I will inform Maria to confess so that she can leave early.", "B) I will inform Maria that if she does not have a lawyer, we could provide one for her.", "C) I will inform Maria that she has a right to bring her counsel during the questioning.", "D) I will inform Maria that she is not obligated to answer our questions.", "E) All of the above."], correctIndex: 0},
+{q: "Maria is suspected of theft. Police officers go to her house and ask her to come to the station for questioning. At the station, Police Staff Sergeant Lito and Patrolman Bong plan to ask her about the missing items and her possible involvement in the incident. If you were Police Staff Sergeant Lito, which of the following should NOT be your advice to Maria?", choices: ["A) I will inform Maria to confess so that she can leave early.", "B) I will inform Maria that if she does not have a lawyer, we could provide one for her.", "C) I will inform Maria that she has a right to bring her counsel during the questioning.", "D) I will inform Maria that she is not obligated to answer our questions.", "E) All of the above."], correctIndex: 0},
 
-  {q: "Where to file a complaint in case the Barangay Protection Order is violated by the accused/respondent?", choices: ["A) Court of Appeals that has territorial jurisdiction over the barangay.", "B) Regional Trial Court that has territorial jurisdiction over the barangay.", "C) Municipal Trial Court that has territorial jurisdiction over the barangay.", "D) Supreme Court", "E) None of the above"], correctIndex: 2},
+{q: "Where to file a complaint in case the Barangay Protection Order is violated by the accused/respondent?", choices: ["A) Court of Appeals that has territorial jurisdiction over the barangay.", "B) Regional Trial Court that has territorial jurisdiction over the barangay.", "C) Municipal Trial Court that has territorial jurisdiction over the barangay.", "D) Supreme Court", "E) None of the above"], correctIndex: 2},
 
-  {q: "What is the prescription period for the crime of plunder?", choices: ["A) 10 years", "B) 15 years", "C) 20 years", "D) 25 years", "E) 30 years"], correctIndex: 2},
+{q: "What is the prescription period for the crime of plunder?", choices: ["A) 10 years", "B) 15 years", "C) 20 years", "D) 25 years", "E) 30 years"], correctIndex: 2},
 
-  {q: "Which of the following crimes involves the unlawful killing of a direct ascendant or descendant?", choices: ["A) Parricide", "B) Murder", "C) Homicide", "D) Infanticide", "E) None of the above"], correctIndex: 0},
+{q: "Which of the following crimes involves the unlawful killing of a direct ascendant or descendant?", choices: ["A) Parricide", "B) Murder", "C) Homicide", "D) Infanticide", "E) None of the above"], correctIndex: 0},
 
-  {q: "Which of the following crimes does not have a frustrated stage under Philippine law?", choices: ["A) Theft", "B) Murder", "C) Homicide", "D) Robbery", "E) None of the above"], correctIndex: 0},
+{q: "Which of the following crimes does not have a frustrated stage under Philippine law?", choices: ["A) Theft", "B) Murder", "C) Homicide", "D) Robbery", "E) None of the above"], correctIndex: 0},
 
-  {q: "What is the threshold level of intoxication set under RA No. 10586?", choices: ["A) BAC of 0.05% or over", "B) BAC of 0.05%", "C) BAC of 0.5%", "D) BAC of 0.5% or over", "E) None of the above"], correctIndex: 0},
+{q: "What is the threshold level of intoxication set under RA No. 10586?", choices: ["A) BAC of 0.05% or over", "B) BAC of 0.05%", "C) BAC of 0.5%", "D) BAC of 0.5% or over", "E) None of the above"], correctIndex: 0},
 
-  {q: "Under the amended Rape law, a statutory rape is committed if the age of the victim is below ________.", choices: ["A) 12", "B) 13", "C) 15", "D) 16", "E) None of the above"], correctIndex: 3},
+{q: "Under the amended Rape law, a statutory rape is committed if the age of the victim is below ________.", choices: ["A) 12", "B) 13", "C) 15", "D) 16", "E) None of the above"], correctIndex: 3},
 
-  {q: "What details must be provided in a request for toxicology analysis?", choices: ["A) The suspected substance and estimated dosage", "B) The suspect’s signed confession", "C) The scheduled court hearing date", "D) The names of the witnesses", "E) None of the above"], correctIndex: 0},
+{q: "What details must be provided in a request for toxicology analysis?", choices: ["A) The suspected substance and estimated dosage", "B) The suspect’s signed confession", "C) The scheduled court hearing date", "D) The names of the witnesses", "E) None of the above"], correctIndex: 0},
 
-  {q: "Which of the following situation does not constitute custodial investigation?", choices: ["A) A person requested for appearance by the police officers in the station.", "B) A person interviewed by the police officers at the house where the alleged crime took place.", "C) A person detained was interviewed by the police officers about the crime reported.", "D) A person arrested was interviewed by the police officers about the crime reported", "E) None of the above"], correctIndex: 0},
+{q: "Which of the following situation does not constitute custodial investigation?", choices: ["A) A person requested for appearance by the police officers in the station.", "B) A person interviewed by the police officers at the house where the alleged crime took place.", "C) A person detained was interviewed by the police officers about the crime reported.", "D) A person arrested was interviewed by the police officers about the crime reported", "E) None of the above"], correctIndex: 0},
 
-  {q: "Which of the following situations is considered a “dating relationship” under RA 9262?", choices: ["A) The parties live together as husband and wife without marriage.", "B) The parties are romantically involved over time.", "C) The relationship exists even without sexual intercourse.", "D) The parties are romantically involved on a continuing basis.", "E) All"], correctIndex: 4},
+{q: "Which of the following situations is considered a “dating relationship” under RA 9262?", choices: ["A) The parties live together as husband and wife without marriage.", "B) The parties are romantically involved over time.", "C) The relationship exists even without sexual intercourse.", "D) The parties are romantically involved on a continuing basis.", "E) All"], correctIndex: 4},
 
-  {q: "Who has original and exclusive jurisdiction over all prosecutions under the Plunder Law?", choices: ["A) Ombudsman", "B) Regional Trial Court", "C) Sandiganbayan", "D) Supreme Court", "E) None of the above"], correctIndex: 2},
+{q: "Who has original and exclusive jurisdiction over all prosecutions under the Plunder Law?", choices: ["A) Ombudsman", "B) Regional Trial Court", "C) Sandiganbayan", "D) Supreme Court", "E) None of the above"], correctIndex: 2},
 
-  {q: "Why is character evidence of the accused generally inadmissible?", choices: ["A) It is irrelevant in all situations", "B) It may unfairly prejudice the court against the accused", "C) It conclusively establishes guilt", "D) It applies only in civil cases", "E) It replaces object evidence"], correctIndex: 1},
+{q: "Why is character evidence of the accused generally inadmissible?", choices: ["A) It is irrelevant in all situations", "B) It may unfairly prejudice the court against the accused", "C) It conclusively establishes guilt", "D) It applies only in civil cases", "E) It replaces object evidence"], correctIndex: 1},
 
-  {q: "Which of the following is not a required element in a chain of custody record?", choices: ["A) Signature of receiver", "B) Date of transfer", "C) Description of evidence", "D) Judge’s approval", "E) Evidence seals"], correctIndex: 3},
+{q: "Which of the following is not a required element in a chain of custody record?", choices: ["A) Signature of receiver", "B) Date of transfer", "C) Description of evidence", "D) Judge’s approval", "E) Evidence seals"], correctIndex: 3},
 
-  {q: "What is the gravamen of the offense under BP 22?", choices: ["A) The act of making or issuing a worthless check.", "B) The knowledge of the drawer in the insufficiency of funds.", "C) The refusal of the drawer to fund the account after receiving a notice of dishonor.", "D) Failure of the drawee bank to honor the check despite sufficient funds.", "E) The negligence of the payee in depositing the check on time."], correctIndex: 0},
+{q: "What is the gravamen of the offense under BP 22?", choices: ["A) The act of making or issuing a worthless check.", "B) The knowledge of the drawer in the insufficiency of funds.", "C) The refusal of the drawer to fund the account after receiving a notice of dishonor.", "D) Failure of the drawee bank to honor the check despite sufficient funds.", "E) The negligence of the payee in depositing the check on time."], correctIndex: 0},
 
-  {q: "Parental and filial privilege means:", choices: ["A) Parents can always refuse to appear in court", "B) Relatives cannot testify for each other", "C) Ascendants and descendants cannot be compelled to testify against each other", "D) A child can never testify against a parent even voluntarily", "E) Parents must always testify against their children"], correctIndex: 2},
+{q: "Parental and filial privilege means:", choices: ["A) Parents can always refuse to appear in court", "B) Relatives cannot testify for each other", "C) Ascendants and descendants cannot be compelled to testify against each other", "D) A child can never testify against a parent even voluntarily", "E) Parents must always testify against their children"], correctIndex: 2},
 
-  {q: "What does the Parol Evidence Rule provide?", choices: ["A) Original documents must always be presented", "B) Written contracts are presumed to contain all terms, and oral evidence cannot vary them except in specific cases", "C) Oral agreements override written contracts", "D) Witness testimony is not allowed in contract disputes", "E) Written evidence is invalid unless signed"], correctIndex: 1},
+{q: "What does the Parol Evidence Rule provide?", choices: ["A) Original documents must always be presented", "B) Written contracts are presumed to contain all terms, and oral evidence cannot vary them except in specific cases", "C) Oral agreements override written contracts", "D) Witness testimony is not allowed in contract disputes", "E) Written evidence is invalid unless signed"], correctIndex: 1},
 
-  {q: "How long must the head of office ensure a warrant of arrest is executed from receipt?", choices: ["A) 3 days", "B) 5 days", "C) 7 days", "D) 10 days", "E) 30 days"], correctIndex: 3}
+{q: "How long must the head of office ensure a warrant of arrest is executed from receipt?", choices: ["A) 3 days", "B) 5 days", "C) 7 days", "D) 10 days", "E) 30 days"], correctIndex: 3}
 
 
   ];
@@ -656,7 +687,3 @@ if (contactSubmit) {
 </script>
 </body>
 </html>
-
-
-
-
